@@ -80,9 +80,8 @@ fun MindQuestApp() {
                             selected = currentRoute == item.matchRoute,
                             onClick = {
                                 navController.navigate(item.navigateRoute) {
-                                    popUpTo(Destination.Landing.route) { saveState = true }
+                                    popUpTo(Destination.Landing.route)
                                     launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             icon = { Icon(item.icon, contentDescription = item.label) },
