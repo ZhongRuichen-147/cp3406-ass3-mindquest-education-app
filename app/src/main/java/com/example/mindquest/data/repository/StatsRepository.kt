@@ -9,7 +9,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 interface StatsRepository {
-    fun observeRecentResults(limit: Int = 50): Flow<List<ActivityResult>>
+    /** Full play history, unbounded — use for aggregate stats (totals, best score, streak). */
+    fun observeAllResults(): Flow<List<ActivityResult>>
+
+    /** Bounded to [limit] — use only for a "recent activity" display list, never for aggregates. */
+    fun observeRecentResults(limit: Int = 10): Flow<List<ActivityResult>>
     suspend fun recordResult(result: ActivityResult)
     suspend fun clearHistory()
 }
@@ -18,6 +22,9 @@ class StatsRepositoryImpl(
     private val dao: ActivityResultDao,
     private val dispatcher: CoroutineDispatcher
 ) : StatsRepository {
+
+    override fun observeAllResults(): Flow<List<ActivityResult>> =
+        dao.observeAll().map { list -> list.map { it.toDomain() } }
 
     override fun observeRecentResults(limit: Int): Flow<List<ActivityResult>> =
         dao.observeRecent(limit).map { list -> list.map { it.toDomain() } }

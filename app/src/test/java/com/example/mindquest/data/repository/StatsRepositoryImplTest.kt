@@ -31,13 +31,33 @@ class StatsRepositoryImplTest {
             totalCount = 5,
             durationMs = 12000L
         )
-        every { dao.observeRecent(50) } returns flowOf(listOf(entity))
+        every { dao.observeRecent(any()) } returns flowOf(listOf(entity))
 
-        val results = repository.observeRecentResults().first()
+        val results = repository.observeRecentResults(limit = 10).first()
 
         assertEquals(1, results.size)
         assertEquals(4, results.first().score)
         assertEquals(ActivityType.QUIZ, results.first().type)
+    }
+
+    @Test
+    fun `observeAllResults maps the full unbounded history to domain models`() = runTest(dispatcher) {
+        val entities = (1..250).map { i ->
+            ActivityResultEntity(
+                id = i.toLong(),
+                type = ActivityType.QUIZ,
+                timestamp = i.toLong(),
+                score = 1,
+                correctCount = 1,
+                totalCount = 1,
+                durationMs = 1000L
+            )
+        }
+        every { dao.observeAll() } returns flowOf(entities)
+
+        val results = repository.observeAllResults().first()
+
+        assertEquals(250, results.size)
     }
 
     @Test

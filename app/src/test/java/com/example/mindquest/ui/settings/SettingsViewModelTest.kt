@@ -48,6 +48,7 @@ class SettingsViewModelTest {
 
     private var historyCleared = false
     private val fakeStatsRepository = object : StatsRepository {
+        override fun observeAllResults() = MutableStateFlow(emptyList<ActivityResult>())
         override fun observeRecentResults(limit: Int) = MutableStateFlow(emptyList<ActivityResult>())
         override suspend fun recordResult(result: ActivityResult) {}
         override suspend fun clearHistory() {

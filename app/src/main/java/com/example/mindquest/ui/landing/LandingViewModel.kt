@@ -18,7 +18,7 @@ data class LandingUiState(
 
 class LandingViewModel(statsRepository: StatsRepository) : ViewModel() {
 
-    val uiState: StateFlow<LandingUiState> = statsRepository.observeRecentResults(limit = 200)
+    val uiState: StateFlow<LandingUiState> = statsRepository.observeAllResults()
         .map { results ->
             val timestamps = results.map { it.timestamp }
             val now = System.currentTimeMillis()

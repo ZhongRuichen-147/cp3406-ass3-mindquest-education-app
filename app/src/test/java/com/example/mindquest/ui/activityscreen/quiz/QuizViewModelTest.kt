@@ -40,6 +40,7 @@ class QuizViewModelTest {
 
     private val recorded = mutableListOf<ActivityResult>()
     private val fakeStatsRepository = object : StatsRepository {
+        override fun observeAllResults() = MutableStateFlow(emptyList<ActivityResult>())
         override fun observeRecentResults(limit: Int) = MutableStateFlow(emptyList<ActivityResult>())
         override suspend fun recordResult(result: ActivityResult) {
             recorded.add(result)

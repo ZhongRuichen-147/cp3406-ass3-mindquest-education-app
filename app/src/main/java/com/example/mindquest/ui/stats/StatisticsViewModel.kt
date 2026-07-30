@@ -23,7 +23,11 @@ data class StatisticsUiState(
 
 class StatisticsViewModel(statsRepository: StatsRepository) : ViewModel() {
 
-    val uiState: StateFlow<StatisticsUiState> = statsRepository.observeRecentResults(limit = 200)
+    // Aggregates (totalGames, bestQuizScore, streakDays, ...) must be computed over the full
+    // history, not a capped "recent" query — otherwise they silently stop growing once play
+    // count exceeds the cap. observeAllResults() is already ordered newest-first, so toUiState
+    // can slice the "recent" display list straight off it.
+    val uiState: StateFlow<StatisticsUiState> = statsRepository.observeAllResults()
         .map(::toUiState)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatisticsUiState())
 }
