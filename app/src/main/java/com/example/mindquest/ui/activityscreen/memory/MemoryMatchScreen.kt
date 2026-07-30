@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -98,6 +101,15 @@ private fun MemoryCardView(card: MemoryCard, onClick: () -> Unit) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             if (rotation > 90f) {
                 Text(text = card.symbol, style = MaterialTheme.typography.titleLarge)
+                // Matched cards get a checkmark too — the tertiaryContainer/secondaryContainer
+                // color swap alone isn't a reliable cue for colorblind players.
+                if (card.isMatched) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = "Matched",
+                        modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
+                    )
+                }
             } else {
                 Text(text = "?", style = MaterialTheme.typography.titleLarge)
             }
