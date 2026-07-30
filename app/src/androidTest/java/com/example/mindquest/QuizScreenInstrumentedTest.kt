@@ -49,6 +49,9 @@ class QuizScreenInstrumentedTest {
         override suspend fun clearAll() {}
     }
 
+    // Constructing the ViewModel directly (instead of via a factory) is intentional here —
+    // it's how a fake-repo-backed ViewModel gets injected for a deterministic UI test.
+    @Suppress("ViewModelConstructorInComposable")
     @Test
     fun selectingAnAnswerRevealsTheNextQuestionButton() {
         composeTestRule.setContent {
