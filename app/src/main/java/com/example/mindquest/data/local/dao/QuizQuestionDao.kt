@@ -21,4 +21,9 @@ interface QuizQuestionDao {
 
     @Query("DELETE FROM quiz_questions")
     suspend fun clearAll()
+
+    // Retires cached rows that fail the content filter — e.g. ones cached before the
+    // filter existed — so they stop being served without waiting for a full cache clear.
+    @Query("DELETE FROM quiz_questions WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 }

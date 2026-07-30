@@ -3,6 +3,7 @@ package com.example.mindquest.data.repository
 import com.example.mindquest.data.NetworkResult
 import com.example.mindquest.data.local.dao.QuizQuestionDao
 import com.example.mindquest.data.local.entity.QuizQuestionEntity
+import com.example.mindquest.data.remote.ContentFilter
 import com.example.mindquest.data.remote.TriviaApi
 import com.example.mindquest.data.remote.TriviaCategories
 import com.example.mindquest.data.settings.Difficulty
@@ -35,7 +36,15 @@ class QuizRepositoryImpl(
         return withContext(dispatcher) {
             val syncError = syncFromNetwork(difficulty)
 
-            val cached = dao.getRandomQuestions(difficulty.triviaValue, count)
+            // Over-fetch: some cached rows may predate the content filter (or a keyword miss
+            // slipped one through at sync time), so pull extra and filter again before serving.
+            val candidates = dao.getRandomQuestions(difficulty.triviaValue, count * CACHE_OVER_FETCH_FACTOR)
+            val (safe, unsafe) = candidates.partition { it.isKidSafe() }
+            if (unsafe.isNotEmpty()) {
+                dao.deleteByIds(unsafe.map { it.id })
+            }
+            val cached = safe.take(count)
+
             if (cached.isNotEmpty()) {
                 NetworkResult.Success(cached.map { it.toDomain() })
             } else {
@@ -56,18 +65,26 @@ class QuizRepositoryImpl(
             )
             val body = response.body()
             if (response.isSuccessful && body != null && body.response_code == 0) {
-                val entities = body.results.map { dto ->
-                    QuizQuestionEntity(
-                        category = dto.category.unescapeHtml(),
-                        difficulty = dto.difficulty,
-                        question = dto.question.unescapeHtml(),
-                        correctAnswer = dto.correct_answer.unescapeHtml(),
-                        incorrectAnswersJson = json.encodeToString(
-                            dto.incorrect_answers.map { it.unescapeHtml() }
-                        ),
-                        fetchedAt = System.currentTimeMillis()
-                    )
-                }
+                val entities = body.results
+                    .filter { dto ->
+                        ContentFilter.isSafe(
+                            dto.question.unescapeHtml(),
+                            dto.correct_answer.unescapeHtml(),
+                            *dto.incorrect_answers.map { it.unescapeHtml() }.toTypedArray()
+                        )
+                    }
+                    .map { dto ->
+                        QuizQuestionEntity(
+                            category = dto.category.unescapeHtml(),
+                            difficulty = dto.difficulty,
+                            question = dto.question.unescapeHtml(),
+                            correctAnswer = dto.correct_answer.unescapeHtml(),
+                            incorrectAnswersJson = json.encodeToString(
+                                dto.incorrect_answers.map { it.unescapeHtml() }
+                            ),
+                            fetchedAt = System.currentTimeMillis()
+                        )
+                    }
                 dao.insertAll(entities)
                 null
             } else {
@@ -89,6 +106,15 @@ class QuizRepositoryImpl(
             correctAnswer = correctAnswer,
             options = (incorrect + correctAnswer).shuffled()
         )
+    }
+
+    private fun QuizQuestionEntity.isKidSafe(): Boolean {
+        val incorrect = json.decodeFromString<List<String>>(incorrectAnswersJson)
+        return ContentFilter.isSafe(question, correctAnswer, *incorrect.toTypedArray())
+    }
+
+    private companion object {
+        const val CACHE_OVER_FETCH_FACTOR = 4
     }
 }
 
