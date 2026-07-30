@@ -1,6 +1,7 @@
 package com.example.mindquest.di
 
 import androidx.room.Room
+import com.example.mindquest.data.local.MIGRATION_1_2
 import com.example.mindquest.data.local.MindQuestDatabase
 import com.example.mindquest.data.remote.TriviaApi
 import com.example.mindquest.data.repository.QuizRepository
@@ -38,7 +39,9 @@ val networkModule = module {
 
 val databaseModule = module {
     single {
-        Room.databaseBuilder(androidContext(), MindQuestDatabase::class.java, "mindquest.db").build()
+        Room.databaseBuilder(androidContext(), MindQuestDatabase::class.java, "mindquest.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
     single { get<MindQuestDatabase>().quizQuestionDao() }
     single { get<MindQuestDatabase>().activityResultDao() }

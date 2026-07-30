@@ -8,7 +8,9 @@ import com.example.mindquest.data.local.entity.QuizQuestionEntity
 
 @Dao
 interface QuizQuestionDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // IGNORE relies on the (question, difficulty) unique index — a question already cached
+    // from an earlier sync is silently skipped instead of accumulating as a duplicate row.
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(questions: List<QuizQuestionEntity>)
 
     @Query("SELECT * FROM quiz_questions WHERE difficulty = :difficulty ORDER BY RANDOM() LIMIT :limit")

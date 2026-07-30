@@ -10,7 +10,7 @@ import com.example.mindquest.data.local.entity.QuizQuestionEntity
 
 @Database(
     entities = [QuizQuestionEntity::class, ActivityResultEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
