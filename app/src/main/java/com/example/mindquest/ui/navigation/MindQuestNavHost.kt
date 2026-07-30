@@ -84,7 +84,10 @@ fun MindQuestApp() {
                                     launchSingleTop = true
                                 }
                             },
-                            icon = { Icon(item.icon, contentDescription = item.label) },
+                            // contentDescription is null because the visible label below already
+                            // gives this item its accessible name — a non-null value here would
+                            // make TalkBack announce the label twice.
+                            icon = { Icon(item.icon, contentDescription = null) },
                             label = { Text(item.label) }
                         )
                     }
