@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MindQuest" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- windowBackground approximates Compose's light background (see LightColorScheme in
+         Theme.kt) so the system-drawn window looks close to the real UI during the frame
+         before setContent's Compose theme takes over on cold start. -->
+    <style name="Theme.MindQuest" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FFFFFBFE</item>
+    </style>
 </resources>

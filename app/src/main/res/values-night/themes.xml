@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- windowBackground approximates Compose's dark background (see DarkColorScheme in
+         Theme.kt) so a device in system dark mode doesn't flash white before setContent's
+         Compose theme takes over on cold start. -->
+    <style name="Theme.MindQuest" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF1C1B1F</item>
+    </style>
+</resources>
