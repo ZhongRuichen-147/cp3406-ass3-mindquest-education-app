@@ -72,7 +72,9 @@ private fun StatTile(label: String, value: String, modifier: Modifier = Modifier
     }
 }
 
-private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
+// A fresh instance per call instead of a shared constant: Locale.getDefault() can change
+// while the app is running (and SimpleDateFormat isn't thread-safe to share anyway).
+private fun dateFormat() = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
 
 @Composable
 private fun ActivityResultRow(result: ActivityResult) {
@@ -91,7 +93,7 @@ private fun ActivityResultRow(result: ActivityResult) {
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "Score ${result.score} · ${dateFormat.format(Date(result.timestamp))}",
+                    text = "Score ${result.score} · ${dateFormat().format(Date(result.timestamp))}",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
