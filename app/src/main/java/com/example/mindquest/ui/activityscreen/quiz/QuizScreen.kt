@@ -155,11 +155,23 @@ private fun AnswerButton(
         AnswerButtonState.INCORRECT -> Color(0xFFE53935)
         AnswerButtonState.NEUTRAL -> MaterialTheme.colorScheme.secondaryContainer
     }
+    val contentColor = when (state) {
+        AnswerButtonState.CORRECT, AnswerButtonState.INCORRECT -> Color.White
+        AnswerButtonState.NEUTRAL -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
     Card(
         modifier = Modifier.fillMaxWidth().testTag("quiz_option"),
         onClick = onClick,
         enabled = enabled,
-        colors = CardDefaults.cardColors(containerColor = containerColor)
+        // The card becomes disabled as soon as an answer is picked — exactly when this color
+        // needs to be visible — so the disabled colors must be set explicitly too, or Material3
+        // silently falls back to a generic grey and the correct/incorrect colors never show.
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = containerColor,
+            disabledContentColor = contentColor
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
